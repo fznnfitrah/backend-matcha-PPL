@@ -1,0 +1,11 @@
+.agents/
+.claude/
+.cursor/
+.devin/
+
+.env
+docker-compose.yml
+Dockerfile
+node_modules/
+prisma.ts
+index.ts
