@@ -126,29 +126,29 @@ Respons yang diharapkan:
 
 ## Environment Variables
 
-| Variable | Wajib | Deskripsi |
-| --- | --- | --- |
-| `PORT` | Tidak | Port server Express (default `3000`, contoh `.env` memakai `5000`). |
-| `DATABASE_URL` | Ya | Connection string MySQL, format `mysql://user:password@host:port/nama_database`. |
-| `MIDTRANS_SERVER_KEY` | Belum dipakai | Server key Midtrans untuk pembayaran. |
-| `MIDTRANS_CLIENT_KEY` | Belum dipakai | Client key Midtrans untuk pembayaran. |
+| Variable              | Wajib         | Deskripsi                                                                        |
+| --------------------- | ------------- | -------------------------------------------------------------------------------- |
+| `PORT`                | Tidak         | Port server Express (default `3000`, contoh `.env` memakai `5000`).              |
+| `DATABASE_URL`        | Ya            | Connection string MySQL, format `mysql://user:password@host:port/nama_database`. |
+| `MIDTRANS_SERVER_KEY` | Belum dipakai | Server key Midtrans untuk pembayaran.                                            |
+| `MIDTRANS_CLIENT_KEY` | Belum dipakai | Client key Midtrans untuk pembayaran.                                            |
 
 ## NPM Scripts
 
-| Script | Fungsi |
-| --- | --- |
-| `npm run dev` | Menjalankan server dengan auto-reload (nodemon). |
-| `npm start` | Menjalankan server tanpa auto-reload. |
-| `npm run prisma:generate` | Membuat ulang Prisma Client. |
-| `npm run prisma:migrate` | Membuat & menerapkan migrasi baru (development). |
-| `npm run prisma:deploy` | Menerapkan migrasi yang sudah ada (production). |
-| `npm run prisma:studio` | Membuka Prisma Studio untuk melihat data. |
+| Script                    | Fungsi                                           |
+| ------------------------- | ------------------------------------------------ |
+| `npm run dev`             | Menjalankan server dengan auto-reload (nodemon). |
+| `npm start`               | Menjalankan server tanpa auto-reload.            |
+| `npm run prisma:generate` | Membuat ulang Prisma Client.                     |
+| `npm run prisma:migrate`  | Membuat & menerapkan migrasi baru (development). |
+| `npm run prisma:deploy`   | Menerapkan migrasi yang sudah ada (production).  |
+| `npm run prisma:studio`   | Membuka Prisma Studio untuk melihat data.        |
 
 ## Endpoint yang Tersedia
 
-| Method | Endpoint | Deskripsi |
-| --- | --- | --- |
-| GET | `/` | Menampilkan pesan bahwa API berjalan. |
+| Method | Endpoint | Deskripsi                             |
+| ------ | -------- | ------------------------------------- |
+| GET    | `/`      | Menampilkan pesan bahwa API berjalan. |
 
 > Endpoint fitur (auth, produk, pesanan, pembayaran, dll.) akan ditambahkan pada tahap berikutnya.
 
@@ -166,5 +166,4 @@ Respons yang diharapkan:
 - Pastikan MySQL lokal aktif dan migrasi sudah dijalankan sebelum memanggil API.
 - File `.env` tidak ikut di-commit; buat sendiri dari `.env.example`.
 
-
-testing pull request
+testing pull request oke mas github+discordnya
