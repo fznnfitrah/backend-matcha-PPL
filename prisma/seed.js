@@ -1,5 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
+
+// Password default untuk data seeding (dipakai untuk login saat demo).
+const ADMIN_PASSWORD = 'admin123';
+const CUSTOMER_PASSWORD = 'password123';
 
 async function main() {
   console.log('🌱 Memulai proses seeding database Matcha...');
@@ -18,12 +23,15 @@ async function main() {
   // ==========================================
   // 2. SEED USERS (Minimal 5 data)
   // ==========================================
+  const adminPasswordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  const customerPasswordHash = await bcrypt.hash(CUSTOMER_PASSWORD, 10);
+
   const users = await Promise.all([
     prisma.user.create({
       data: {
         name: 'Admin Matcha',
         email: 'admin@matcha.com',
-        password: '$2b$10$hashedpassworddummyadmin', // Hash dummy
+        password: adminPasswordHash,
         role: 'ADMIN',
       },
     }),
@@ -31,7 +39,7 @@ async function main() {
       data: {
         name: 'Achmad Fauzan',
         email: 'fauzan@gmail.com',
-        password: '$2b$10$hashedpassworddummy1',
+        password: customerPasswordHash,
         role: 'CUSTOMER',
       },
     }),
@@ -39,7 +47,7 @@ async function main() {
       data: {
         name: 'Vanka Rahma',
         email: 'vanka@gmail.com',
-        password: '$2b$10$hashedpassworddummy2',
+        password: customerPasswordHash,
         role: 'CUSTOMER',
       },
     }),
@@ -47,7 +55,7 @@ async function main() {
       data: {
         name: 'Muhammad Arfian',
         email: 'arfian@gmail.com',
-        password: '$2b$10$hashedpassworddummy3',
+        password: customerPasswordHash,
         role: 'CUSTOMER',
       },
     }),
@@ -55,7 +63,7 @@ async function main() {
       data: {
         name: 'Siti Aminah',
         email: 'siti@gmail.com',
-        password: '$2b$10$hashedpassworddummy4',
+        password: customerPasswordHash,
         role: 'CUSTOMER',
       },
     }),

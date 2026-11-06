@@ -14,6 +14,9 @@ const {
 // Status order yang masih boleh dibayar
 const PAYABLE_STATUSES = ['PENDING_PAYMENT'];
 
+// Batas waktu pembayaran (harus sama dengan countdown di frontend)
+const PAYMENT_WINDOW_MS = 15 * 60 * 1000;
+
 // POST: Membuat Snap Token Midtrans untuk sebuah Order
 const createPaymentToken = asyncHandler(async (req, res) => {
   const { orderId } = req.body;
@@ -88,6 +91,15 @@ const createPaymentToken = asyncHandler(async (req, res) => {
     );
   }
 
+  // Masa berlaku pembayaran mengikuti countdown frontend (15 menit sejak order dibuat).
+  // Sisa waktu dibulatkan ke atas agar tidak lebih pendek dari yang dilihat user.
+  const expiresAt = new Date(order.createdAt).getTime() + PAYMENT_WINDOW_MS;
+  const remainingMs = expiresAt - Date.now();
+  if (remainingMs <= 0) {
+    throw new AppError('Batas waktu pembayaran sudah habis', 410);
+  }
+  const expiryMinutes = Math.max(1, Math.min(15, Math.ceil(remainingMs / 60000)));
+
   // Suffix timestamp base36 menjaga order_id tetap unik untuk pembayaran ulang,
   // sekaligus aman dari batas 50 karakter Midtrans.
   // Pemisah "__" agar tidak bentrok dengan tanda "-" di dalam UUID.
@@ -97,6 +109,10 @@ const createPaymentToken = asyncHandler(async (req, res) => {
     transaction_details: {
       order_id: midtransOrderId,
       gross_amount: grossAmount,
+    },
+    expiry: {
+      unit: 'minutes',
+      duration: expiryMinutes,
     },
     customer_details: {
       first_name: order.customerName.substring(0, 50),
@@ -140,14 +156,62 @@ const createPaymentToken = asyncHandler(async (req, res) => {
   });
 });
 
+// GET: Status pembayaran ringkas untuk halaman pembayaran frontend
+const getPaymentStatus = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { payment: true },
+  });
+
+  if (!order) {
+    throw new AppError('Pesanan tidak ditemukan', 404);
+  }
+
+  if (req.user.role !== 'ADMIN' && order.userId !== req.user.id) {
+    throw new AppError('Anda tidak memiliki akses ke pesanan ini', 403);
+  }
+
+  let status = 'pending';
+  const paymentStatus = order.payment?.paymentStatus;
+
+  if (paymentStatus === 'SUCCESS') {
+    status = 'paid';
+  } else if (paymentStatus === 'FAILED' || paymentStatus === 'REFUNDED') {
+    status = 'failed';
+  } else if (order.orderStatus === 'CANCELLED') {
+    status = 'expired';
+  } else if (
+    order.orderStatus === 'PENDING_PAYMENT' &&
+    Date.now() - new Date(order.createdAt).getTime() > PAYMENT_WINDOW_MS
+  ) {
+    status = 'expired';
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: 'Berhasil mengambil status pembayaran',
+    data: {
+      status,
+      orderStatus: order.orderStatus,
+      paymentStatus: paymentStatus || null,
+    },
+  });
+});
+
 // POST: Webhook Notification Handler dari Midtrans
 const handleMidtransWebhook = asyncHandler(async (req, res) => {
   const notification = req.body || {};
-  const serverKey = process.env.MIDTRANS_SERVER_KEY;
 
-  if (!serverKey) {
+  if (!process.env.MIDTRANS_SERVER_KEY) {
     throw new AppError('MIDTRANS_SERVER_KEY belum dikonfigurasi', 500);
   }
+
+  // Midtrans memakai Signature Secret Key untuk menandatangani webhook.
+  // Server Key tetap dipakai untuk memanggil API Midtrans, bukan untuk signature.
+  const signatureKey =
+    process.env.MIDTRANS_SIGNATURE_SECRET || process.env.MIDTRANS_SERVER_KEY;
 
   if (
     !notification.transaction_id ||
@@ -158,7 +222,7 @@ const handleMidtransWebhook = asyncHandler(async (req, res) => {
   }
 
   // Tolak notifikasi yang tidak memiliki signature valid
-  if (!verifySignature(notification, serverKey)) {
+  if (!verifySignature(notification, signatureKey)) {
     throw new AppError('Signature notifikasi tidak valid', 401);
   }
 
@@ -261,5 +325,6 @@ const handleMidtransWebhook = asyncHandler(async (req, res) => {
 
 module.exports = {
   createPaymentToken,
+  getPaymentStatus,
   handleMidtransWebhook,
 };
