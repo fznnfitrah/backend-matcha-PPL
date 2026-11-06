@@ -165,5 +165,3 @@ Respons yang diharapkan:
 - Backend berjalan di `http://localhost:5000`.
 - Pastikan MySQL lokal aktif dan migrasi sudah dijalankan sebelum memanggil API.
 - File `.env` tidak ikut di-commit; buat sendiri dari `.env.example`.
-
-testing pull request oke mas github+discordnya
