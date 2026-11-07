@@ -17,6 +17,9 @@ const errorHandler = (err, req, res, next) => {
     } else if (err.code === 'P2003') {
       status = 400;
       message = 'Data masih berelasi dengan data lain';
+    } else if (err.code === 'P2020') { // <-- Ubah dari P2004 ke P2020
+      status = 400;
+      message = 'Nilai data melebihi batas kapasitas yang diizinkan database (Out of range).';
     }
   }
 
