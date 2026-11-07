@@ -38,8 +38,42 @@ const deleteExpense = asyncHandler(async (req, res) => {
   });
 });
 
+const updateExpense = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { title, amount, expenseDate, notes } = req.body;
+
+  // Cek apakah data pengeluaran ada
+  const existingExpense = await prisma.expense.findUnique({
+    where: { id },
+  });
+
+  if (!existingExpense) {
+    return res.status(404).json({
+      success: false,
+      message: 'Data pengeluaran tidak ditemukan',
+    });
+  }
+
+  const updatedExpense = await prisma.expense.update({
+    where: { id },
+    data: {
+      title: title !== undefined ? title : undefined,
+      amount: amount !== undefined ? amount : undefined,
+      expenseDate: expenseDate ? new Date(expenseDate) : expenseDate === null ? null : undefined,
+      notes: notes !== undefined ? notes : undefined,
+    },
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: 'Pengeluaran berhasil diperbarui',
+    data: updatedExpense,
+  });
+});
+
 module.exports = {
   getAllExpenses,
   createExpense,
   deleteExpense,
+  updateExpense,
 };
