@@ -21,12 +21,7 @@ const router = express.Router();
 router.get('/', getAllProducts); // GET /api/products
 router.get('/:id', validate(idParamSchema, 'params'), getProductById); // GET /api/products/:id
 router.post('/', validate(createProductSchema), createProduct); // POST /api/products
-router.put(
-  '/:id',
-  validate(idParamSchema, 'params'),
-  validate(updateProductSchema),
-  updateProduct,
-); // PUT /api/products/:id
+router.put('/:id', validate(idParamSchema, 'params'), validate(updateProductSchema), updateProduct,); // PUT /api/products/:id
 router.delete('/:id', validate(idParamSchema, 'params'), deleteProduct); // DELETE /api/products/:id
 
 module.exports = router;
