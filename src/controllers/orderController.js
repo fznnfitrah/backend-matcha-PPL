@@ -111,6 +111,7 @@ const getOrders = asyncHandler(async (req, res) => {
       user: {
         select: { id: true, name: true, email: true },
       },
+      payment: true,
     },
     orderBy: { createdAt: 'desc' },
   };
